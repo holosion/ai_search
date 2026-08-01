@@ -263,6 +263,7 @@ if __name__ == "__main__":
     except Exception as e:
         print('Error loading maze:', e)
         sys.exit(1)
+        
 
     try:
         m.solve(method=method)
