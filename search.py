@@ -28,6 +28,32 @@ class StackFrontier:
     def __init__(self):
         self.frontier = []
 
+    def add(self, node):
+        self.frontier.append(node)
+
+    #checking for an existing element wihtin the frontier
+    def contains_state(self, state):
+        for node in self.frontier:
+            if node.state == state:
+                return True
+        return False
+
+    #checking if the frontier is empty
+    def empty(self):
+        if len(self.frontier) == 0:
+            return not self.frontier
+
+    #removing the las element from the frontier
+    def remove(self):
+        if self.empty():
+            raise Exception("empty frontier")
+        else:
+            node = self.frontier[-1]
+            self.frontier = self.frontier[:-1]
+            return node
+        
+
+
 
 
 
