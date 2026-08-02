@@ -40,8 +40,7 @@ class StackFrontier:
 
     #checking if the frontier is empty
     def empty(self):
-        if len(self.frontier) == 0:
-            return not self.frontier
+        return not self.frontier
 
     #removing the las element from the frontier
     def remove(self):
