@@ -63,6 +63,19 @@ def neighbors(state):
     ]
 
 
+class Maze:
+    def __init__(self ):
+        pass
+
+    def neighbors(self, state):
+        row, col = state
+        candidates=[
+            ("up", (row -1, col)),
+            ("down", (row +1, col)),
+            ("left", (row, col -1)), 
+            ("right",(row, col +1)),
+        ]
+        
 
 
 
