@@ -75,7 +75,20 @@ class Maze:
             ("left", (row, col -1)), 
             ("right",(row, col +1)),
         ]
+
+    start = Node(
+        state = (0,0),
+        parent = None,
+        action = None
         
+    )
+
+    frontier = StackFrontier()
+    frontier.add(start)
+    explored = set()
+    
+
+
 
 
 
