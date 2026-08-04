@@ -52,7 +52,7 @@ class StackFrontier:
             return node
         
 
-def neighbors(state):
+#def neighbors(state):
     row, col = state
 
     candidates=[
