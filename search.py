@@ -89,18 +89,19 @@ class Maze:
     
 
 
-def solve(self):
-    #creating a start node for the search algorithm
-    start = Node(
-        state = (0,0),
-        parent = None,
-        action = None
-    )
-    #creating a frontier for the search algorithm
-    frontier = StackFrontier()
+    def solve(self):
+        #creating a start node for the search algorithm
+        start = Node(
+            state = (0,0),
+            parent = None,
+            action = None
+        )
+        #creating a frontier for the search algorithm
+        frontier = StackFrontier()
 
-    #adding the start node to the frontier
-    frontier.add(start)
+        #adding the start node to the frontier
+        frontier.add(start)
 
-    #creating an explored set to keep track of the explored nodes
-    explored = set()
+        #creating an explored set to keep track of the explored nodes
+        explored = set()
+
