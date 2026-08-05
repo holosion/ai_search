@@ -6,24 +6,7 @@ class Node:
         self.action = action
         self.parent = parent
 
-#creating a starting point for the search algorithm
-start = Node(
-    state = (0,0),
-    parent = None,
-    action = None
 
-)
-node1 = Node(
-    state = (0,1),
-    parent = start,
-    action = "right"
-)
-
-node2 = Node(
-    state = (0,2),
-    parent = node1,
-    action = "right"
-)
 class StackFrontier:
     def __init__(self):
         self.frontier = []
@@ -124,6 +107,7 @@ class Maze:
                     actions.append(node.action)
                     cells.append(node.state)
                     current = current.parent
+                    explored.add(current.state)
 
                 actions.reverse()
                 cells.reverse()
