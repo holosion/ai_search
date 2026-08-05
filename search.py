@@ -94,3 +94,10 @@ class Maze:
         #creating an explored set to keep track of the explored nodes
         explored = set()
 
+        #generating the while loop to explor the nodes in the frontier
+        while True:
+            if frontier.empty():
+                raise Exception("no solution")
+            node = frontier.remove()
+
+
