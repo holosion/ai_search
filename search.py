@@ -100,4 +100,32 @@ class Maze:
                 raise Exception("no solution")
             node = frontier.remove()
 
+            if node.state == self.goal:
+
+                actions = []
+                cells = []
+
+                while node.parent is not None:
+                    actions.append(node.action)
+                    cells.append(node.state)
+                    current = current.parent
+
+                actions.reverse()
+                cells.reverse()
+
+                return actions, cells
+
+            #adding the current node to the explored set
+            for action, state in self.neighbors(node.state):
+                if not frontier.contains_state(state) and state not in explored:
+                    child = Node(
+                        state = state,
+                        parent = node,
+                        action = action
+
+                    )
+                    frontier .add(child)
+
+
+
 
