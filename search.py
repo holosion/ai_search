@@ -99,11 +99,26 @@ class Maze:
             if frontier.empty():
                 raise Exception("no solution")
             node = frontier.remove()
+            explored.add(node.state)
 
+            #implementing the goal test to check if the current node is the goal state
             if node.state == self.goal:
+                actions =[]
+                cells =[]
 
-                actions = []
-                cells = []
+                current = node
+                while current.parent is not None:
+                    actions.append(current.action)
+                    cells.append(current.state)
+
+                    current = current.parent
+
+                    actions.reverse()
+                    cells.reverse()
+
+                    return actions, cells
+
+            
 
                 while node.parent is not None:
                     actions.append(node.action)
