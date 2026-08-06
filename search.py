@@ -51,15 +51,26 @@ class StackFrontier:
 class Maze:
 
     def __init__(self):
-        """
-        We have not yet built the real maze.
+        self.maze = [
+            "#####",
+            "#A B#",
+            "#####"
+        ]
 
-        Later we will add:
-            self.start
-            self.goal
-            self.walls
-        """
-        pass
+        self.start = None
+        self.goal = None
+        self.walls = []
+
+        for i,row in enumerate(self.maze):
+            for j,col in enumerate(row):
+                if col == "A":
+                    self.start = (i,j)
+                elif col == "B":
+                    self.goal = (i,j)
+                elif col == "#":
+                    self.walls.append((i,j))
+
+        
 
 
     # ========================================================
