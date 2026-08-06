@@ -90,10 +90,12 @@ class Maze:
 
         ]
 
-        # For now we return every possible move.
-        # Later we'll remove moves that hit walls
-        # or go outside the maze.
-        return candidates
+        result =[]
+#checking each candidate to see if it is a valid move (not a wall and within bounds)
+        for action, (r, c) in candidates:
+            if 0 <= r < len(self.maze) and 0 <= c < len(self.maze[0]) and (r,c) not in self.walls:
+                result.append((action, (r,c)))
+        return result
 
 
     # ========================================================
