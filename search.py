@@ -52,9 +52,11 @@ class Maze:
 
     def __init__(self):
         self.maze = [
-            "#####",
-            "#A B#",
-            "#####"
+            "########",
+            "#A     #",
+            "# ###  #",
+            "#   #B #",
+            "########"
         ]
 
         self.start = None
@@ -105,9 +107,8 @@ class Maze:
     def solve(self):
 
         # Create the start node
-        # (Later this will use self.start)
         start = Node(
-            state=(0, 0),
+            state=self.start,
             parent=None,
             action=None
         )
@@ -134,24 +135,22 @@ class Maze:
             # ------------------------------------------------
             # GOAL TEST
             # ------------------------------------------------
-            # Later this will work after we define self.goal
-            #
-            # if node.state == self.goal:
-            #
-            #     actions = []
-            #     cells = []
-            #
-            #     current = node
-            #
-            #     while current.parent is not None:
-            #         actions.append(current.action)
-            #         cells.append(current.state)
-            #         current = current.parent
-            #
-            #     actions.reverse()
-            #     cells.reverse()
-            #
-            #     return actions, cells
+            if node.state == self.goal:
+
+                actions = []
+                cells = []
+
+                current = node
+
+                while current.parent is not None:
+                    actions.append(current.action)
+                    cells.append(current.state)
+                    current = current.parent
+
+                actions.reverse()
+                cells.reverse()
+
+                return actions, cells
 
             # Mark the node as explored
             explored.add(node.state)
