@@ -1,10 +1,11 @@
-explored = set()
+maze = [
+    "#####",
+    "#A B#",
+    "#####"
+]
 
-explored.add((0, 0))
-explored.add((0, 1))
-explored.add((0, 2))
-
-print(explored)
-
-print((0, 1) in explored)
-print((1, 1) in explored)
+for i, row in enumerate(maze):
+   # print(i,row)
+    for j,col in enumerate(row):
+       # print(j,col)
+        print(f"({i},{j}), {col}")
