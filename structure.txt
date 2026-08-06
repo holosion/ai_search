@@ -1,0 +1,39 @@
+Start
+
+↓
+
+Create start node
+
+↓
+
+Add to frontier
+
+↓
+
+while True
+
+↓
+
+Remove a node
+
+↓
+
+Is it the goal?
+
+        YES
+         ↓
+Stop searching
+         ↓
+Reconstruct the path
+         ↓
+Return the solution
+
+        NO
+         ↓
+Mark node as explored
+         ↓
+Generate valid neighbours
+         ↓
+Add them to the frontier
+         ↓
+Repeat
