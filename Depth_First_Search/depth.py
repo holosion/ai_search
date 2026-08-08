@@ -3,6 +3,9 @@
 # Reads maze.txt and creates results.txt
 # ============================================================
 
+from pathlib import Path
+
+FOLDER = Path(__file__).resolve().parent
 
 # ============================================================
 # STEP 1: NODE
@@ -273,7 +276,7 @@ class Maze:
         # WRITE RESULTS TO results.txt
         # ====================================================
 
-        with open("results.txt", "w") as file:
+        with open(FOLDER / "results.txt", "w") as file:
 
             file.write("DEPTH-FIRST SEARCH RESULTS\n")
             file.write("==========================\n\n")
@@ -303,7 +306,7 @@ class Maze:
 # STEP 7: RUN THE PROGRAM
 # ============================================================
 
-maze = Maze("maze.txt")
+maze = Maze(FOLDER / "maze.txt")
 
 actions, cells = maze.solve()
 

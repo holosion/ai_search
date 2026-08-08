@@ -1,0 +1,24 @@
+DEPTH-FIRST SEARCH RESULTS
+==========================
+
+Start: (1, 1)
+Goal: (3, 5)
+Explored cells: 9
+Solution cells: 8
+
+LEGEND
+======
+A = Start
+B = Goal
+# = Wall
+. = Explored by DFS
+* = Final solution path
+  = Unexplored
+
+DFS RESULT
+==========
+########
+#A*****#
+# ### *#
+#    B*#
+########
