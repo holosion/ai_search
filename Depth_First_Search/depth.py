@@ -1,328 +1,198 @@
-# ============================================================
-# DEPTH-FIRST SEARCH MAZE SOLVER
-# Reads maze.txt and creates results.txt
-# ============================================================
+"""Solve a text maze using depth-first search (DFS)."""
 
+from dataclasses import dataclass
 from pathlib import Path
 
+
 FOLDER = Path(__file__).resolve().parent
+MAZE_FILE = FOLDER / "maze.txt"
+RESULTS_FILE = FOLDER / "results.txt"
+Position = tuple[int, int]
 
-# ============================================================
-# STEP 1: NODE
-# ============================================================
 
+@dataclass
 class Node:
+    """One position in the search tree."""
 
-    def __init__(self, state, parent, action):
-        self.state = state
-        self.parent = parent
-        self.action = action
+    state: Position
+    parent: "Node | None"
+    action: str | None
 
-
-# ============================================================
-# STEP 2: STACK FRONTIER
-# This is what makes our search DFS.
-# The last node added is the first node removed.
-# ============================================================
 
 class StackFrontier:
+    """A last-in, first-out frontier. This produces DFS behaviour."""
 
-    def __init__(self):
-        self.frontier = []
+    def __init__(self) -> None:
+        self.frontier: list[Node] = []
 
-    def add(self, node):
+    def add(self, node: Node) -> None:
         self.frontier.append(node)
 
-    def contains_state(self, state):
+    def contains_state(self, state: Position) -> bool:
+        return any(node.state == state for node in self.frontier)
 
-        for node in self.frontier:
-            if node.state == state:
-                return True
+    def empty(self) -> bool:
+        return not self.frontier
 
-        return False
-
-    def empty(self):
-        return len(self.frontier) == 0
-
-    def remove(self):
-
+    def remove(self) -> Node:
         if self.empty():
-            raise Exception("Empty Frontier")
+            raise ValueError("Cannot remove a node from an empty frontier.")
+        return self.frontier.pop()
 
-        # Remove the LAST element -> LIFO -> DFS
-        node = self.frontier[-1]
-
-        self.frontier = self.frontier[:-1]
-
-        return node
-
-
-# ============================================================
-# STEP 3: MAZE
-# ============================================================
 
 class Maze:
+    """A maze where A is the start, B is the goal, and # is a wall."""
 
-    def __init__(self, filename):
+    def __init__(self, filename: Path | str) -> None:
+        self.maze = Path(filename).read_text(encoding="utf-8").splitlines()
+        if not self.maze:
+            raise ValueError("The maze file is empty.")
 
-        # Read the maze from the text file
-        with open(filename, "r") as file:
+        self.start: Position | None = None
+        self.goal: Position | None = None
+        self.walls: set[Position] = set()
 
-            self.maze = [
-                line.rstrip("\n")
-                for line in file
-            ]
+        for row, line in enumerate(self.maze):
+            for column, character in enumerate(line):
+                position = (row, column)
+                if character == "A":
+                    if self.start is not None:
+                        raise ValueError("The maze contains more than one start point A.")
+                    self.start = position
+                elif character == "B":
+                    if self.goal is not None:
+                        raise ValueError("The maze contains more than one goal point B.")
+                    self.goal = position
+                elif character == "#":
+                    self.walls.add(position)
 
-        self.start = None
-        self.goal = None
-        self.walls = []
-
-        # Find A, B and the walls
-        for i, row in enumerate(self.maze):
-
-            for j, col in enumerate(row):
-
-                if col == "A":
-                    self.start = (i, j)
-
-                elif col == "B":
-                    self.goal = (i, j)
-
-                elif col == "#":
-                    self.walls.append((i, j))
-
-        # Make sure A and B actually exist
         if self.start is None:
-            raise Exception("Maze does not contain a start point A")
-
+            raise ValueError("The maze does not contain a start point A.")
         if self.goal is None:
-            raise Exception("Maze does not contain a goal point B")
+            raise ValueError("The maze does not contain a goal point B.")
 
-        # This will store all cells DFS explores
-        self.explored = set()
+        self.explored: set[Position] = set()
 
-
-    # ========================================================
-    # STEP 4: GENERATE VALID NEIGHBOURS
-    # ========================================================
-
-    def neighbors(self, state):
-
-        row, col = state
-
+    def neighbors(self, state: Position) -> list[tuple[str, Position]]:
+        """Return valid moves from a position in a consistent order."""
+        row, column = state
         candidates = [
-
-            ("up", (row - 1, col)),
-            ("down", (row + 1, col)),
-            ("left", (row, col - 1)),
-            ("right", (row, col + 1))
-
+            ("up", (row - 1, column)),
+            ("down", (row + 1, column)),
+            ("left", (row, column - 1)),
+            ("right", (row, column + 1)),
         ]
 
-        result = []
+        valid_moves = []
+        for action, (next_row, next_column) in candidates:
+            # Each row is checked independently, so uneven maze rows work too.
+            is_in_maze = (
+                0 <= next_row < len(self.maze)
+                and 0 <= next_column < len(self.maze[next_row])
+            )
+            if is_in_maze and (next_row, next_column) not in self.walls:
+                valid_moves.append((action, (next_row, next_column)))
 
-        # Check every possible movement
-        for action, (r, c) in candidates:
+        return valid_moves
 
-            # 1. Is the position inside the maze?
-            # 2. Is the position NOT a wall?
-            if (
-                0 <= r < len(self.maze)
-                and
-                0 <= c < len(self.maze[0])
-                and
-                (r, c) not in self.walls
-            ):
+    def solve(self) -> tuple[list[str], list[Position]]:
+        """Find a path from A to B using DFS and return its moves and cells."""
+        if self.start is None or self.goal is None:
+            raise ValueError("The maze must have a start and goal before solving.")
 
-                result.append((action, (r, c)))
-
-        return result
-
-
-    # ========================================================
-    # STEP 5: DEPTH-FIRST SEARCH
-    # ========================================================
-
-    def solve(self):
-
-        # Create the starting node
-        start = Node(
-            state=self.start,
-            parent=None,
-            action=None
-        )
-
-        # Create the DFS frontier
         frontier = StackFrontier()
-
-        # Add starting node
-        frontier.add(start)
-
-        # Reset explored cells
+        frontier.add(Node(state=self.start, parent=None, action=None))
         self.explored = set()
 
-        # Keep searching
-        while True:
-
-            # No nodes left = no solution
-            if frontier.empty():
-                raise Exception("No Solution")
-
-            # Remove the LAST node
+        while not frontier.empty():
             node = frontier.remove()
-
-            # Record that DFS visited this cell
             self.explored.add(node.state)
 
-            # =================================================
-            # GOAL TEST
-            # =================================================
-
             if node.state == self.goal:
-
-                actions = []
-                cells = []
-
-                current = node
-
-                # Follow parents backwards
-                while current.parent is not None:
-
-                    actions.append(current.action)
-                    cells.append(current.state)
-
-                    current = current.parent
-
-                # We collected the path backwards,
-                # so reverse it.
-                actions.reverse()
-                cells.reverse()
-
-                return actions, cells
-
-
-            # =================================================
-            # EXPAND THE CURRENT NODE
-            # =================================================
+                return self._build_solution(node)
 
             for action, state in self.neighbors(node.state):
+                if state not in self.explored and not frontier.contains_state(state):
+                    frontier.add(Node(state=state, parent=node, action=action))
 
-                # Don't add something we already explored
-                # or something already waiting in the frontier.
-                if (
-                    state not in self.explored
-                    and not frontier.contains_state(state)
-                ):
+        raise ValueError("No solution exists for this maze.")
 
-                    child = Node(
-                        state=state,
-                        parent=node,
-                        action=action
-                    )
+    @staticmethod
+    def _build_solution(node: Node) -> tuple[list[str], list[Position]]:
+        """Trace parent links from the goal node back to the start."""
+        actions: list[str] = []
+        cells: list[Position] = []
 
-                    frontier.add(child)
+        while node.parent is not None:
+            if node.action is not None:
+                actions.append(node.action)
+            cells.append(node.state)
+            node = node.parent
 
+        actions.reverse()
+        cells.reverse()
+        return actions, cells
 
-    # ========================================================
-    # STEP 6: CREATE results.txt
-    # ========================================================
-
-    def save_results(self, solution):
-
-        # Convert the solution into a set so that
-        # checking whether a cell belongs to the path
-        # is easy.
+    def save_results(self, solution: list[Position], filename: Path = RESULTS_FILE) -> None:
+        """Write the maze, explored cells, and final solution to a text file."""
         solution_cells = set(solution)
+        rendered_maze = []
 
-        result = []
-
-        # Go through every cell in the original maze
-        for i, row in enumerate(self.maze):
-
-            new_row = ""
-
-            for j, character in enumerate(row):
-
-                position = (i, j)
-
-                # Start
+        for row, line in enumerate(self.maze):
+            rendered_row = []
+            for column, character in enumerate(line):
+                position = (row, column)
                 if position == self.start:
-                    new_row += "A"
-
-                # Goal
+                    rendered_row.append("A")
                 elif position == self.goal:
-                    new_row += "B"
-
-                # Wall
+                    rendered_row.append("B")
                 elif position in self.walls:
-                    new_row += "#"
-
-                # Final solution path
+                    rendered_row.append("#")
                 elif position in solution_cells:
-                    new_row += "*"
-
-                # Explored by DFS but not part of final path
+                    rendered_row.append("*")
                 elif position in self.explored:
-                    new_row += "."
-
-                # Unexplored open space
+                    rendered_row.append(".")
                 else:
-                    new_row += " "
+                    rendered_row.append(character)
+            rendered_maze.append("".join(rendered_row))
 
-            result.append(new_row)
-
-
-        # ====================================================
-        # WRITE RESULTS TO results.txt
-        # ====================================================
-
-        with open(FOLDER / "results.txt", "w") as file:
-
-            file.write("DEPTH-FIRST SEARCH RESULTS\n")
-            file.write("==========================\n\n")
-
-            file.write(f"Start: {self.start}\n")
-            file.write(f"Goal: {self.goal}\n")
-            file.write(f"Explored cells: {len(self.explored)}\n")
-            file.write(f"Solution cells: {len(solution)}\n\n")
-
-            file.write("LEGEND\n")
-            file.write("======\n")
-            file.write("A = Start\n")
-            file.write("B = Goal\n")
-            file.write("# = Wall\n")
-            file.write(". = Explored by DFS\n")
-            file.write("* = Final solution path\n")
-            file.write("  = Unexplored\n\n")
-
-            file.write("DFS RESULT\n")
-            file.write("==========\n")
-
-            for row in result:
-                file.write(row + "\n")
+        report = [
+            "DEPTH-FIRST SEARCH RESULTS",
+            "==========================",
+            "",
+            f"Start: {self.start}",
+            f"Goal: {self.goal}",
+            f"Explored cells: {len(self.explored)}",
+            f"Solution cells: {len(solution)}",
+            "",
+            "LEGEND",
+            "======",
+            "A = Start",
+            "B = Goal",
+            "# = Wall",
+            ". = Explored by DFS",
+            "* = Final solution path",
+            "",
+            "DFS RESULT",
+            "==========",
+            *rendered_maze,
+            "",
+        ]
+        filename.write_text("\n".join(report), encoding="utf-8")
 
 
-# ============================================================
-# STEP 7: RUN THE PROGRAM
-# ============================================================
+def main() -> None:
+    """Run the DFS maze solver using the folder's maze.txt file."""
+    maze = Maze(MAZE_FILE)
+    actions, cells = maze.solve()
+    maze.save_results(cells)
 
-maze = Maze(FOLDER / "maze.txt")
+    print("DFS completed successfully!")
+    print(f"\nActions: {actions}")
+    print(f"\nSolution: {cells}")
+    print(f"\nExplored cells: {sorted(maze.explored)}")
+    print(f"\nResults saved to: {RESULTS_FILE.name}")
 
-actions, cells = maze.solve()
 
-# Display result in terminal
-print("DFS completed successfully!")
-
-print("\nActions:")
-print(actions)
-
-print("\nSolution:")
-print(cells)
-
-print("\nExplored cells:")
-print(maze.explored)
-
-# Create results.txt
-maze.save_results(cells)
-
-print("\nresults.txt has been created.")
+if __name__ == "__main__":
+    main()

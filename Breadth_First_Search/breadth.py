@@ -126,7 +126,115 @@ class Maze:
                     actions.reverse()
                     cells.reverse()
                     return actions, cells
+                
+                #expand the current node to add its neighbors to the frontier
+                for action, state in self.neighbors(node.state):
+                    if not frontier.contains_state(state) and state not in self.explored:
+                        child = Node(state=state, parent=node, action=action)
+                        frontier.add(child)
+
+            #create a results.txt file to store the results of the maze solving algorithm
+            def save_results(self, solution):
+            
+                    # Convert the solution into a set so that
+                    # checking whether a cell belongs to the path
+                    # is easy.
+                    solution_cells = set(solution)
+            
+                    result = []
+            
+                    # Go through every cell in the original maze
+                    for i, row in enumerate(self.maze):
+            
+                        new_row = ""
+            
+                        for j, character in enumerate(row):
+            
+                            position = (i, j)
+            
+                            # Start
+                            if position == self.start:
+                                new_row += "A"
+            
+                            # Goal
+                            elif position == self.goal:
+                                new_row += "B"
+            
+                            # Wall
+                            elif position in self.walls:
+                                new_row += "#"
+            
+                            # Final solution path
+                            elif position in solution_cells:
+                                new_row += "*"
+            
+                            # Explored by DFS but not part of final path
+                            elif position in self.explored:
+                                new_row += "."
+            
+                            # Unexplored open space
+                            else:
+                                new_row += " "
+            
+                        result.append(new_row)
+            
+            
+                    # ====================================================
+                    # WRITE RESULTS TO results.txt
+                    # ====================================================
+            
+                    with open(FOLDER / "results.txt", "w") as file:
+            
+                        file.write("DEPTH-FIRST SEARCH RESULTS\n")
+                        file.write("==========================\n\n")
+            
+                        file.write(f"Start: {self.start}\n")
+                        file.write(f"Goal: {self.goal}\n")
+                        file.write(f"Explored cells: {len(self.explored)}\n")
+                        file.write(f"Solution cells: {len(solution)}\n\n")
+            
+                        file.write("LEGEND\n")
+                        file.write("======\n")
+                        file.write("A = Start\n")
+                        file.write("B = Goal\n")
+                        file.write("# = Wall\n")
+                        file.write(". = Explored by DFS\n")
+                        file.write("* = Final solution path\n")
+                        file.write("  = Unexplored\n\n")
+            
+                        file.write("DFS RESULT\n")
+                        file.write("==========\n")
+            
+                        for row in result:
+                            file.write(row + "\n")
+            
+            
+            # ============================================================
+            # STEP 7: RUN THE PROGRAM
+            # ============================================================
+            
+            maze = Maze(FOLDER / "maze.txt")
+            
+            actions, cells = maze.solve()
+            
+            # Display result in terminal
+            print("DFS completed successfully!")
+            
+            print("\nActions:")
+            print(actions)
+            
+            print("\nSolution:")
+            print(cells)
+            
+            print("\nExplored cells:")
+            print(maze.explored)
+            
+            # Create results.txt
+            maze.save_results(cells)
+            
+            print("\nresults.txt has been created.")
+            
 
 
-                    
+
 

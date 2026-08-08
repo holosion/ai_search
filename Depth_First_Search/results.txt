@@ -13,7 +13,6 @@ B = Goal
 # = Wall
 . = Explored by DFS
 * = Final solution path
-  = Unexplored
 
 DFS RESULT
 ==========
