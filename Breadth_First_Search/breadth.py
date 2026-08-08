@@ -55,4 +55,78 @@ class Maze:
         if self.goal is None:
             raise Exception("Goal position not found in the maze")
 
-        
+        #create a set of valid actions for the maze
+        self.explored = set()
+
+        # generating  valid neighbors for a given state in the maze
+        def neighbors(self, state):
+            row, col = state
+            candidates = [
+                ("up", (row -1, col)),
+                ("down", (row + 1, col)),   
+                ("left", (row, col - 1)),
+                ("right", (row, col + 1))
+            ]
+
+            result = []
+
+            #check if and every possible valid movements
+            for action, (r, c) in candidates:
+                if 0 <= r < len(self.maze) and 0 <= c < len(self.maze[0]) and (r,c) not in self.walls:
+                    result.append((action, (r,c)))
+
+                    return result
+
+        #implementing the breadth first search algorithm to solve the maze
+        def solve(self):
+            #initialize the frontier with the start position
+            start = Node(state=self.start, parent=None, action=None)
+            frontier = QueueFrontier()
+            frontier.add(start)
+
+            #explore the maze until the goal is found or the frontier is empty
+            while True:
+                if frontier.empty():
+                    raise Exception("No solution")
+
+                node = frontier.remove()
+
+                #check if the goal has been reached
+                if node.state == self.goal:
+                    actions = []
+                    cells = []
+                    while node.parent is not None:
+                        actions.append(node.action)
+                        cells.append(node.state)
+                        node = node.parent
+                    actions.reverse()
+                    cells.reverse()
+                    return actions, cells
+
+                #mark the current state as explored
+                self.explored.add(node.state)
+
+                #add neighbors to the frontier
+                for action, state in self.neighbors(node.state):
+                    if not frontier.contains_state(state) and state not in self.explored:
+                        child = Node(state=state, parent=node, action=action)
+                        frontier.add(child)
+
+                
+                #implementing the goal test to check if the goal has been reached
+                if node.state == self.goal:
+                    actions = []
+                    cells = []
+
+                    while node.parent is not None:
+                        actions.append(node.action)
+                        cells.append(node.state)
+                        current = current.parent  # or use current = current.parent
+
+                    actions.reverse()
+                    cells.reverse()
+                    return actions, cells
+
+
+                    
+
