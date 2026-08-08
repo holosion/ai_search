@@ -44,17 +44,18 @@ class StackFrontier:
 # STEP 3: CREATE THE MAZE CLASS
 # ============================================================
 
+import sys
+
+
 class Maze:
 
-    def __init__(self):
+    def __init__(self, filename):
 
-        self.maze = [
-            "########",
-            "#A     #",
-            "# ###  #",
-            "#   #B #",
-            "########"
-        ]
+        with open(filename, encoding="utf-8") as file:
+            self.maze = [line.rstrip("\n") for line in file]
+
+        if not self.maze or any(len(row) != len(self.maze[0]) for row in self.maze):
+            raise ValueError("Maze rows must all have the same width.")
 
         self.start = None
         self.goal = None
@@ -167,12 +168,28 @@ class Maze:
 
                     frontier.add(child)
 
+    def print_solution(self, cells):
+        """Print the maze with the route marked by asterisks."""
+        route = set(cells)
+
+        for row, line in enumerate(self.maze):
+            display_row = []
+            for col, character in enumerate(line):
+                if (row, col) in route and character not in ("A", "B"):
+                    display_row.append("*")
+                else:
+                    display_row.append(character)
+            print("".join(display_row))
+
 
 # ============================================================
 # STEP 6: RUN THE ALGORITHM
 # ============================================================
 
-maze = Maze()
+if len(sys.argv) != 2:
+    raise SystemExit("Usage: python search2.py maze-file.txt")
+
+maze = Maze(sys.argv[1])
 
 actions, cells = maze.solve()
 
@@ -181,3 +198,6 @@ print(actions)
 
 print("\nCells:")
 print(cells)
+
+print("\nSolved maze (* = path from A to B):")
+maze.print_solution(cells)
