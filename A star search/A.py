@@ -1,7 +1,7 @@
 #implementing an A* search algorithm in Python
 def a_star_search(graph, start, goal, heuristic):
 
-    # nodes that still need to be explored
+    # Nodes that still need to be explored.
     open_list = [start]
 
     #nodes that have already been explored
@@ -18,5 +18,6 @@ def a_star_search(graph, start, goal, heuristic):
     #to reconstruct the final path
     came_from = {}
 
+    # Select the most promising node until the goal is found.
     while open_list:
         pass
