@@ -23,6 +23,7 @@ class StackFrontier:
     """A last-in, first-out frontier. This produces DFS behaviour."""
 
     def __init__(self) -> None:
+        # A list used as a stack gives DFS last-in, first-out behavior.
         self.frontier: list[Node] = []
 
     def add(self, node: Node) -> None:
@@ -44,6 +45,7 @@ class Maze:
     """A maze where A is the start, B is the goal, and # is a wall."""
 
     def __init__(self, filename: Path | str) -> None:
+        # Read the maze and collect the special cells used by the solver.
         self.maze = Path(filename).read_text(encoding="utf-8").splitlines()
         if not self.maze:
             raise ValueError("The maze file is empty.")
@@ -52,6 +54,7 @@ class Maze:
         self.goal: Position | None = None
         self.walls: set[Position] = set()
 
+        # Scan every cell to identify the start, goal, and walls.
         for row, line in enumerate(self.maze):
             for column, character in enumerate(line):
                 position = (row, column)
@@ -76,6 +79,7 @@ class Maze:
     def neighbors(self, state: Position) -> list[tuple[str, Position]]:
         """Return valid moves from a position in a consistent order."""
         row, column = state
+        # Consider moves in a stable order so runs are reproducible.
         candidates = [
             ("up", (row - 1, column)),
             ("down", (row + 1, column)),
@@ -100,10 +104,12 @@ class Maze:
         if self.start is None or self.goal is None:
             raise ValueError("The maze must have a start and goal before solving.")
 
+        # Seed the DFS frontier with the start node.
         frontier = StackFrontier()
         frontier.add(Node(state=self.start, parent=None, action=None))
         self.explored = set()
 
+        # Pop one node at a time and add its unvisited neighbors.
         while not frontier.empty():
             node = frontier.remove()
             self.explored.add(node.state)
@@ -120,6 +126,7 @@ class Maze:
     @staticmethod
     def _build_solution(node: Node) -> tuple[list[str], list[Position]]:
         """Trace parent links from the goal node back to the start."""
+        # Follow parent links backward, then reverse both result lists.
         actions: list[str] = []
         cells: list[Position] = []
 
@@ -135,9 +142,11 @@ class Maze:
 
     def save_results(self, solution: list[Position], filename: Path = RESULTS_FILE) -> None:
         """Write the maze, explored cells, and final solution to a text file."""
+        # Convert the path to a set for efficient rendering checks.
         solution_cells = set(solution)
         rendered_maze = []
 
+        # Overlay explored cells and the final route on the original maze.
         for row, line in enumerate(self.maze):
             rendered_row = []
             for column, character in enumerate(line):
@@ -183,6 +192,7 @@ class Maze:
 
 def main() -> None:
     """Run the DFS maze solver using the folder's maze.txt file."""
+    # Run the complete load, search, and report workflow.
     maze = Maze(MAZE_FILE)
     actions, cells = maze.solve()
     maze.save_results(cells)
