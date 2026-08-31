@@ -1,59 +1,66 @@
+import heapq
+
+
+def reconstruct_path(came_from, start, goal):
+    path = []
+    current = goal
+
+    while current != start:
+        path.append(current)
+        current = came_from[current]
+
+    path.append(start)
+    path.reverse()
+    return path
+
+
 def a_star_search(graph, start, goal, heuristic):
-    open_list = [(heuristic[start], start)]
-    closed_list = set()
+    open_heap = [(heuristic[start], 0, start)]
     came_from = {}
     g_score = {node: float('inf') for node in graph}
     g_score[start] = 0
-    f_score = {node: float('inf') for node in graph}
 
-    while open_list:
-        f, current = min(open_list)
-        open_list.remove((f, current))
-        closed_list.add(current)
+    while open_heap:
+        f_score, current_cost, current = heapq.heappop(open_heap)
 
         if current == goal:
-            break
+            return reconstruct_path(came_from, start, goal)
 
-        for neighbor in graph[current]:
-            tentative_g_score = g_score[current] + graph[current][neighbor]
+        if current_cost > g_score[current]:
+            continue
+
+        for neighbor, weight in graph[current].items():
+            tentative_g_score = current_cost + weight
 
             if tentative_g_score < g_score[neighbor]:
                 came_from[neighbor] = current
                 g_score[neighbor] = tentative_g_score
-                f_score[neighbor] = g_score[neighbor] + heuristic[neighbor]
+                heapq.heappush(
+                    open_heap,
+                    (tentative_g_score + heuristic[neighbor], tentative_g_score, neighbor),
+                )
 
-                if neighbor not in open_list:
-                    open_list.append((f_score[neighbor], neighbor))
+    return None
 
-    # Reconstruct the path
-    path = []
-    current = goal
-    while current in came_from:
-        path.append(current)
-        current = came_from[current]
-    path.append(start)
-    path.reverse()
 
-    return path#implementing an A* search algorithm in Python
-def a_star_search(graph, start, goal, heuristic):
+if __name__ == "__main__":
+    graph = {
+        "A": {"B": 1, "C": 4},
+        "B": {"A": 1, "C": 2, "D": 5},
+        "C": {"A": 4, "B": 2, "D": 1},
+        "D": {"B": 5, "C": 1, "E": 2},
+        "E": {"D": 2},
+    }
 
-    # Nodes that still need to be explored.
-    open_list = [start]
+    heuristic = {
+        "A": 5,
+        "B": 3,
+        "C": 2,
+        "D": 2,
+        "E": 0,
+    }
 
-    #nodes that have already been explored
-    closed_list = set()
-
-    #cost from start to each node
-    g_score = {node: float('inf') for node in graph}
-    g_score[start] = 0
-
-    #estimated total cost from start to goal through each node
-    f_score = {node: float('inf') for node in graph}
-    f_score[start] = heuristic[start]
-
-    #to reconstruct the final path
-    came_from = {}
-
-    # Select the most promising node until the goal is found.
-    while open_list:
-        pass
+    path = a_star_search(graph, "A", "E", heuristic)
+    print("Graph:", graph)
+    print("Heuristic:", heuristic)
+    print("Path from A to E:", path)
